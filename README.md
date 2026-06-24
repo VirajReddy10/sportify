@@ -58,6 +58,17 @@ sportify=# \d player_game_stat
 
 Both stat shapes round-tripped correctly through the identical code path — no sport-specific DTOs, no conditional logic, no schema changes required to add a new sport.
 
+
+## External Data Ingestion
+
+`POST /api/admin/ingestion/league?league=English_Premier_League` pulls real team and player data from [TheSportsDB](https://www.thesportsdb.com)'s free public API and persists it into Sportify's own schema. Idempotent — safe to re-run; existing teams/players are skipped rather than duplicated.
+
+```bash
+curl -X POST "http://localhost:8080/api/admin/ingestion/league?league=English_Premier_League" \
+  -H "Authorization: Bearer $TOKEN"
+# {"teamsCreated":18,"playersCreated":350}
+```
+
 ## API Overview
 
 | Method | Endpoint | Auth Required | Description |
@@ -139,7 +150,7 @@ curl -X POST http://localhost:8080/api/sports \
 
 ## Known Limitations / Future Work
 
-- [ ] Real external sports data ingestion (currently populated via the API directly)
+- [x] ~~Real external sports data ingestion~~ — done: `POST /api/admin/ingestion/league?league={name}` pulls real teams and players from TheSportsDB's public API
 - [ ] OpenAPI/Swagger documentation
 - [ ] Database migrations via Flyway (currently `ddl-auto=update`, fine for development, not for production)
 - [ ] JWT secret should come from an environment variable / secrets manager, not a properties file
